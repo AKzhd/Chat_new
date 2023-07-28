@@ -136,7 +136,12 @@ void Chat::ShowUserMenu()
     std::cout << "Hi, " << currentUser_->getUserName() << std::endl;
     while (currentUser_)
     {
-        std::cout << "Menu: (1) Show Chat | (2) Add message | (3) Users | (0) Logout ";
+        std::cout << " Просмотр зарегистрированных пользователей в чате - введите 1 ";
+        std::cout << " Добавить  сообщение                              - введите 2 ";
+        std::cout << " Добавить получателя сообщения                    - введите 3 ";
+        std::cout << " Выход                                            - введите q ";
+
+
         std::cout << std::endl;
         cout << ">>";
         std::cin >> operation;
@@ -151,11 +156,11 @@ void Chat::ShowUserMenu()
         case '3':
             ShowAllUsersName();
             break;
-        case '0':
+        case 'q':
             currentUser_ = nullptr;
             break;
         default:
-            std::cout << " Unknown choice..." << std::endl;
+            std::cout << " Неверный выбор ..." << std::endl;
             break;
         }
     }
@@ -168,7 +173,7 @@ void Chat::addMessage()
     std::cin >> to;
     std::cout << "Текст:                  ";
     std::cin.ignore();
-    getline(std::cin >> to, text);
+    getline(std::cin >> to, text);           //getline предназначена для ввода данных из потока до строкового разделителя.
     
     if (!(to == "all" || getUserByName(to)))
     {
