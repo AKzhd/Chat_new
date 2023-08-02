@@ -1,5 +1,7 @@
 #include <iostream>
 #include "Chat.h"
+#include "Message.h"
+#include "User.h"
 
 using namespace std;
 
@@ -77,14 +79,14 @@ void Chat::signUp()
 
 void Chat::ShowAllUsersName() const
 {
-    cout << "users" << endl;
+    cout << "Пользователи" << endl;
     for (auto &User : userList_)
     {
         cout << User.getUserName();
         cout << endl;
         if (currentUser_->getUserLogin() == User.getUserLogin())
         {
-            cout << "(me)";
+            cout << "(Я)";
             cout << endl;
         }
         cout << endl;
@@ -133,13 +135,13 @@ void Chat::ShowUserMenu()
 {
     char operation;
     ;
-    std::cout << "Hi, " << currentUser_->getUserName() << std::endl;
+    std::cout << " Привет, " << currentUser_->getUserName() << std::endl;
     while (currentUser_)
     {
-        std::cout << " Просмотр зарегистрированных пользователей в чате - введите 1 ";
-        std::cout << " Добавить  сообщение                              - введите 2 ";
-        std::cout << " Добавить получателя сообщения                    - введите 3 ";
-        std::cout << " Выход                                            - введите q ";
+        std::cout << " Просмотр зарегистрированных пользователей в чате - введите 1 "<< std::endl;
+        std::cout << " Отправить сообщение                              - введите 2 "<< std::endl;
+        std::cout << " Просмотр сообщений в чате                        - введите 3 "<< std::endl;
+        std::cout << " Выход                                            - введите q "<< std::endl;
 
 
         std::cout << std::endl;
@@ -148,13 +150,13 @@ void Chat::ShowUserMenu()
         switch (operation)
         {
         case '1':
-            showChat();
+            ShowAllUsersName();
             break;
         case '2':
             addMessage();
             break;
         case '3':
-            ShowAllUsersName();
+            showChat();
             break;
         case 'q':
             currentUser_ = nullptr;

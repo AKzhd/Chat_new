@@ -7,12 +7,11 @@ using namespace std;
 #include "Message.h"
 struct UserLoginExp : public std::exception
 {
-    const char *what() const noexcept override { return "error: user login is bysy"; }
+    const char *what() const noexcept override { return "error: user login is busy"; }
 };
 struct UserNameExp : public std::exception
 {
-    const char *what() const noexcept override { return "error: user name is bysy"; }
-};
+    const char *what() const noexcept override { return "error: user name is busy"; } };
 
 class Chat
 {
