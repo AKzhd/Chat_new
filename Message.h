@@ -2,6 +2,7 @@
 using namespace std;
 #include <string>
 #include "User.h"
+#include "Chat.h"
 class Message
 {
     const std::string _from;
@@ -13,4 +14,5 @@ public:
     const std::string &getFrom() const { return _from; }
     const std::string &getTo() const { return _to; }
     const std::string &getText() const { return _text; }
+    void setText(std::string &text) { text = _text; }
 };

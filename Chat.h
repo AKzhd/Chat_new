@@ -5,6 +5,7 @@ using namespace std;
 #include <memory>
 #include <vector>
 #include "Message.h"
+#include "User.h"
 struct UserLoginExp : public std::exception
 {
     const char *what() const noexcept override { return "error: user login is busy"; }

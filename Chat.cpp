@@ -10,11 +10,15 @@ void Chat::start()
     isChatWork_ = true;
 }
 
+string cyan_begin = "\x1B[36m",cyan_end = "\033[0m\t\t";
+string yellow_begin = "\x1B[33m",yellow_end = "\033[0m\t\t";
+string red_begin = "\x1B[31m",red_end = "\033[0m\t\t";
+
 std::shared_ptr<User> Chat::getUserByLogin(const std::string &login) const
 {
     for (auto &user : userList_)
     {
-        if (login == user.getUserLogin())
+        if (login == user.User::getUserLogin())
             return std::make_shared<User>(user);
     }
     return nullptr;
@@ -24,7 +28,7 @@ std::shared_ptr<User> Chat::getUserByName(const std::string &name) const
 {
     for (auto &user : userList_)
     {
-        if (name == user.getUserName())
+        if (name == user.User::getUserName())
             return std::make_shared<User>(user);
     }
     return nullptr;
@@ -46,8 +50,8 @@ void Chat::login()
         if (currentUser_ == nullptr || (password != currentUser_->getUserPassword()))
         {
             currentUser_ = nullptr;
-            std::cout << "login failed..." << std::endl;
-            std::cout << "(0) exit or any key repeat: ";
+            std::cout << red_begin<<"Неверный логин!!!, для повторения нажмите любую клавищу. Для выхода нажмите 0(ноль) "<<red_end<< std::endl;
+           
             std::cin >> operation;
             if (operation == '0')
                 break;
@@ -99,13 +103,14 @@ void Chat::ShowLoginMenu()
     char operation;
     do
     {
-        std::cout << "Добро пожаловать в консольный чат " << std::endl;
+        std::cout << cyan_begin<<" Добро пожаловать в консольный чат "<<cyan_end << std::endl;
         std::cout << "----------------------------------" << std::endl;
-        std::cout << " Ввести логин       - введите 1" << std::endl;
-        std::cout << " Зарегистрироваться - введите 2" << std::endl;
-        std::cout << " Выход              - введите q" << std::endl;
+        std::cout << yellow_begin<<" Ввести логин       - введите 1" <<yellow_end<< std::endl;
+        std::cout << yellow_begin<<" Зарегистрироваться - введите 2" <<yellow_end<<std::endl;
+        std::cout << yellow_begin<<" Выход              - введите q" <<yellow_end<< std::endl;
 
         std::cin >> operation;
+
         switch (operation)
         {
         case '1':
@@ -138,10 +143,10 @@ void Chat::ShowUserMenu()
     std::cout << " Привет, " << currentUser_->getUserName() << std::endl;
     while (currentUser_)
     {
-        std::cout << " Просмотр зарегистрированных пользователей в чате - введите 1 "<< std::endl;
-        std::cout << " Отправить сообщение                              - введите 2 "<< std::endl;
-        std::cout << " Просмотр сообщений в чате                        - введите 3 "<< std::endl;
-        std::cout << " Выход                                            - введите q "<< std::endl;
+        std::cout << yellow_begin<< " Просмотр зарегистрированных пользователей в чате - введите 1 "<< yellow_end<< std::endl;
+        std::cout << yellow_begin<< " Отправить сообщение                              - введите 2 "<< yellow_end<< std::endl;
+        std::cout << yellow_begin<< " Просмотр сообщений в чате                        - введите 3 "<< yellow_end<< std::endl;
+        std::cout << yellow_begin<< " Выход                                            - введите q "<< yellow_end<< std::endl;
 
 
         std::cout << std::endl;
@@ -171,15 +176,15 @@ void Chat::ShowUserMenu()
 void Chat::addMessage()
 {
     std::string to, text;
-    std::cout << "Отправить кому (Имя или Отправить всем(введите all)):                  ";
+    std::cout << "Отправить кому (Логин или Отправить всем(введите all)):                  ";
     std::cin >> to;
     std::cout << "Текст:                  ";
     std::cin.ignore();
-    getline(std::cin >> to, text);           //getline предназначена для ввода данных из потока до строкового разделителя.
+    getline(std::cin, text);           //getline предназначена для ввода данных из потока до строкового разделителя.
     
-    if (!(to == "all" || getUserByName(to)))
+    if (!(to == "all" || Chat::getUserByName(to)))
     {
-        std::cout << "Ошибка отправки сообщения: Не найден получатель !" << to << std::endl;
+        std::cout << red_begin<<"Ошибка отправки сообщения: Не найден получатель !" <<red_end<< to << std::endl;
         return;
     }
     if (to == "all")
@@ -195,7 +200,7 @@ void Chat::addMessage()
 void Chat::showChat() const
 {
     std::string from, to;
-    std::cout << " =========================================================" << std::endl;
+    std::cout << "\x1B[36m============================================================\033[0m\t\t" << std::endl;
     for (auto &mess : messageList_)
     {
         if (currentUser_->getUserLogin() == mess.getFrom() || currentUser_->getUserLogin() == mess.getTo() || mess.getTo() == "all")
@@ -210,24 +215,8 @@ void Chat::showChat() const
         {
             to = (currentUser_->getUserLogin() == mess.getTo()) ? "me" : getUserByLogin(mess.getTo())->getUserName();
         }
-        std::cout << "Сообщение от: " << from << "Кому: " << to << std::endl;
+        std::cout << "Сообщение от: " << from << "\n" << "Кому: " << to<<"\n"<< std::endl;
         std::cout << "Техт сообщения: " << mess.getText() << std::endl;
     }
-    std::cout << " ============================================================ " << std::endl;
+    std::cout << "\x1B[36m============================================================\033[0m\t\t" << std::endl;
 }
-
-// void Chat::ShowAllUsersName() const
-//{
-//  cout << "users" << endl;
-//  for (auto& User : userList_)
-//         {
-//  cout << User.getUserName();
-//  cout << endl;
-//  if (currentUser_->getUserLogin() == User.getUserLogin())
-//             {
-//  cout << "(me)";
-//  cout << endl;
-//             }
-//  cout << endl;
-//         }
-// }
