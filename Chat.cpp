@@ -13,6 +13,8 @@ void Chat::start()
 string cyan_begin = "\x1B[36m",cyan_end = "\033[0m\t\t";
 string yellow_begin = "\x1B[33m",yellow_end = "\033[0m\t\t";
 string red_begin = "\x1B[31m",red_end = "\033[0m\t\t";
+string green_begin = "\x1B[32m",green_end = "\033[0m\t\t";
+string line = "\x1B[36m============================================================\033[0m\t\t";
 
 std::shared_ptr<User> Chat::getUserByLogin(const std::string &login) const
 {
@@ -40,14 +42,16 @@ void Chat::login()
     char operation;
     do
     {
+        std::cout << line << std::endl;
         std::cout << "login: ";
         std::cin >> login;
         std::cout << "password: ";
         std::cin >> password;
+        std::cout << line << std::endl;
 
         currentUser_ = getUserByLogin(login);
         char operation;
-        if (currentUser_ == nullptr || (password != currentUser_->getUserPassword()))
+        if (currentUser_ == nullptr || (password != currentUser_->getUserPassword())) // Проверка на наличие пользователя и правильности пароля
         {
             currentUser_ = nullptr;
             std::cout << red_begin<<"Неверный логин!!!, для повторения нажмите любую клавищу. Для выхода нажмите 0(ноль) "<<red_end<< std::endl;
@@ -61,13 +65,15 @@ void Chat::login()
 
 void Chat::signUp()
 {
+    std::cout << line << std::endl;
     std::string login, password, name;
-    std::cout << "login:               ";
+    std::cout << green_begin<<"login: "<<green_end;
     std::cin >> login;
-    std::cout << "password: ";
+    std::cout << green_begin<<"password: "<<green_end;
     std::cin >> password;
-    std::cout << "Name: ";
+    std::cout << green_begin<<"Name: "<<green_end;
     std::cin >> name;
+    std::cout << line << std::endl;
     if (getUserByLogin(login) || login == "all")
     {
         throw UserLoginExp();
@@ -76,19 +82,19 @@ void Chat::signUp()
     {
         throw UserNameExp();
     }
-    User user = User(login, password, name);
-    userList_.push_back(user);
-    currentUser_ = std::make_shared<User>(user);
+    User user = User(login, password, name);    // создание экземпляра класса
+    userList_.push_back(user);                    // добавление в конец массива 
+    currentUser_ = std::make_shared<User>(user);   //Создание умного указателя shared_ptr
 }
 
 void Chat::ShowAllUsersName() const
 {
     cout << "Пользователи" << endl;
-    for (auto &User : userList_)
+    for (auto &User : userList_)     //цикл на основе диапазона
     {
         cout << User.getUserName();
         cout << endl;
-        if (currentUser_->getUserLogin() == User.getUserLogin())
+        if (currentUser_->getUserLogin() == User.getUserLogin())  
         {
             cout << "(Я)";
             cout << endl;
@@ -102,9 +108,10 @@ void Chat::ShowLoginMenu()
     currentUser_ = nullptr;
     char operation;
     do
-    {
+    {  
+        std::cout << line << std::endl;
         std::cout << cyan_begin<<" Добро пожаловать в консольный чат "<<cyan_end << std::endl;
-        std::cout << "----------------------------------" << std::endl;
+        std::cout << line << std::endl;
         std::cout << yellow_begin<<" Ввести логин       - введите 1" <<yellow_end<< std::endl;
         std::cout << yellow_begin<<" Зарегистрироваться - введите 2" <<yellow_end<<std::endl;
         std::cout << yellow_begin<<" Выход              - введите q" <<yellow_end<< std::endl;
@@ -141,12 +148,14 @@ void Chat::ShowUserMenu()
     char operation;
     ;
     std::cout << " Привет, " << currentUser_->getUserName() << std::endl;
+    std::cout << line << std::endl;
     while (currentUser_)
     {
         std::cout << yellow_begin<< " Просмотр зарегистрированных пользователей в чате - введите 1 "<< yellow_end<< std::endl;
         std::cout << yellow_begin<< " Отправить сообщение                              - введите 2 "<< yellow_end<< std::endl;
         std::cout << yellow_begin<< " Просмотр сообщений в чате                        - введите 3 "<< yellow_end<< std::endl;
         std::cout << yellow_begin<< " Выход                                            - введите q "<< yellow_end<< std::endl;
+        std::cout << line << std::endl;
 
 
         std::cout << std::endl;
@@ -200,12 +209,12 @@ void Chat::addMessage()
 void Chat::showChat() const
 {
     std::string from, to;
-    std::cout << "\x1B[36m============================================================\033[0m\t\t" << std::endl;
+    std::cout << line << std::endl;
     for (auto &mess : messageList_)
     {
         if (currentUser_->getUserLogin() == mess.getFrom() || currentUser_->getUserLogin() == mess.getTo() || mess.getTo() == "all")
         {
-            from = (currentUser_->getUserLogin() == mess.getFrom()) ? "me" : getUserByLogin(mess.getFrom())->getUserName();
+            from = (currentUser_->getUserLogin() == mess.getFrom()) ? "Я" : getUserByLogin(mess.getFrom())->getUserName();
         }
         if (mess.getTo() == "all")
         {
@@ -213,10 +222,10 @@ void Chat::showChat() const
         }
         else
         {
-            to = (currentUser_->getUserLogin() == mess.getTo()) ? "me" : getUserByLogin(mess.getTo())->getUserName();
+            to = (currentUser_->getUserLogin() == mess.getTo()) ? "Я" : getUserByLogin(mess.getTo())->getUserName();
         }
-        std::cout << "Сообщение от: " << from << "\n" << "Кому: " << to<<"\n"<< std::endl;
-        std::cout << "Техт сообщения: " << mess.getText() << std::endl;
+        std::cout << green_begin<<"Сообщение от: " <<green_end<< from << "\n" << green_begin<<"Кому: " <<green_end<< to<<"\n"<< std::endl;
+        std::cout << green_begin<<"Техт сообщения: " <<green_end<< mess.getText() << std::endl;
     }
-    std::cout << "\x1B[36m============================================================\033[0m\t\t" << std::endl;
+    std::cout << line << std::endl;
 }
