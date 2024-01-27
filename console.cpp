@@ -6,11 +6,11 @@ int main()
 
     while (chat.isChatWork())
     {
-        chat.ShowLoginMenu();
-        while (chat.getCurrentUser())
-        {
-            chat.ShowUserMenu();
-        }
+         chat.ShowLoginMenu();
+        // while (chat.getCurrentUser())
+        // {
+        //     chat.ShowUserMenu();
+        // }
     }
     return 0;
 }
