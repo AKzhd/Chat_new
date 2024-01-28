@@ -47,7 +47,7 @@ public:
     void ShowLoginMenu();
     void ShowUserMenu();
     bool check_login_table(MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row, std::string table, std::string log);
-	bool check_pass_table(MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row, std::string table, std::string log, std::string pass); 
+	bool check_pass(MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row, std::string table, std::string log, std::string pass); 
     void registration(char, bool*, MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row);
     void show_table(MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row, std::string table); 
     void exchange(const std::string& mess);
@@ -55,7 +55,9 @@ public:
 	bool connect_to_db(MYSQL& ms);
     void create_database(MYSQL& ms);
 	void create_table(MYSQL& ms); 
-	void add_user(MYSQL& ms, std::string tbl, std::string login, std::string name, std::string password); 
+	void add_user(MYSQL& ms, std::string tbl, std::string login, std::string name, std::string password);
+    std::string check_uname (MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row, std::string table, std::string log);  
 	void insert_into_message(MYSQL& ms, std::string table, std::string send, std::string name, std::string rec, std::string mess);
     void chat_work();
+
 };

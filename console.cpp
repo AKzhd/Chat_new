@@ -7,10 +7,10 @@ int main()
     while (chat.isChatWork())
     {
          chat.ShowLoginMenu();
-        // while (chat.getCurrentUser())
-        // {
-        //     chat.ShowUserMenu();
-        // }
+        while (chat.getCurrentUser())
+        {
+            chat.ShowUserMenu();
+        }
     }
     return 0;
 }

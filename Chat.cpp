@@ -2,6 +2,7 @@
 #include "Chat.h"
 #include "Message.h"
 #include "User.h"
+#include <string>
 
 using namespace std;
 
@@ -52,15 +53,14 @@ void Chat::create_table(MYSQL &ms)
     else
         std::cout << " Error: don't created table " << table_users << mysql_error(&ms) << std::endl;
 
-    add_user(ms, table_users, "test2", "all", "changemy");
-    add_user(ms, table_users, "test", "test", "eudcyugdy3e4767");
-
+    add_user(ms, table_users, "test", "all", "changemy");
+   
     if (!mysql_query(&ms, "CREATE TABLE messages(id INT AUTO_INCREMENT PRIMARY KEY, sender VARCHAR(255), name VARCHAR(255), recipient VARCHAR(255), mess TEXT)"))
         std::cout << " Table " << table_mess << " created" << std::endl;
     else
         std::cout << " Error: don't created table " << table_mess << mysql_error(&ms) << std::endl;
 
-    insert_into_message(ms, table_mess, "ALL USERS", "Общий чат", "ALL USERS", "Вы в общем чате");
+    insert_into_message(ms, table_mess, "temp_user", "Общий чат", "ALL USERS", "Вы в общем чате");
 }
 
 bool Chat::connect_to_db(MYSQL &ms)
@@ -132,57 +132,43 @@ bool Chat::check_login_table(MYSQL &mysql, MYSQL_RES *res, MYSQL_ROW &row, std::
     }
     return -1;
 }
-// void Chat::registration(char menu, bool* check_user, MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row) {
-// 	User user;
-
-// 	// *check_user = false;
-// 	// // Вход в чат
-// 	// if (menu == '1') {
-// 	// 	exchange(" Введите логин(латинский алфавит, цифры, символы): ");
-// 	// 	user.get_user_login(message());
-// 	// 	exchange(" Введите пароль(латинский алфавит, цифры, символы): ");
-// 	// 	user.get_user_password(message());
-// 	// 	int counter = 0;
-// 	// 	if (!check_pass_table(ms, res, row, table_users, user.user_login(), user.user_password())) {
-// 	// 		user.get_user_name(name_user(ms, res, row, table_users, user.user_login()));
-// 	// 		get_user(user.user_login(), user.user_name());
-// 	// 		transmitting(user.user_name());
-// 	// 		*check_user = true;
-// 	// 	}
-// 	// 	else {
-// 	// 		transmitting("false");
-// 	// 		return;
-// 	// 	}
-// 	// }
-
-// 	// регистрация нового пользователя
-
-// 		*check_user = true;
-// 		user.getUserName();
-// 		exchange(user.user_name());
-// 		exchange(" Введите логин (латинский алфавит, цифры, символы): ");
-// 		bool check_login;
-// 		do {
-// 			user.get_user_login(message());
-// 			check_login = check_login_table(ms, res, row, table_users, user.user_login());
-// 			if (check_login == false) {
-// 				user.clear_login();
-// 				exchange("false");
-// 			}
-// 		} while (!check_login);
-// 		exchange(" логин принят");
-// 		exchange( " Введите пароль (латинский алфавит, цифры, символы): ");
-// 		user.get_user_password(message());
-// 		std::cout << message() << std::endl;
-// 		insert_into_users(ms, table_users, user.user_login(), user.user_name(), user.user_password());
-// 		if(check_login_table(ms, res, row, table_users, user.user_login())){
-// 			*check_user = false;
-// 			return;
-// 		}
-// 		show_table(ms, res, row, table_users);
-// 		exchange("reg ok");
-// 	}
-// }
+bool Chat::check_pass(MYSQL &mysql, MYSQL_RES *res, MYSQL_ROW &row, std::string table, std::string log, std::string pass)
+{
+std::string str = "SELECT * FROM " + table + " WHERE login = \'" + log + "\' AND password = \'" + pass + "\'";
+	if(mysql_query(&mysql, str.c_str()))
+		std::cout << " Неверно введен пароль или логин. Повторите попытку снова! " << std::endl
+			<< mysql_error(&mysql) << std::endl;
+	else{
+			res = mysql_use_result(&mysql);
+			if(res){
+				if (row = mysql_fetch_row(res)){
+					int count = std::stoi(row[0]);
+					mysql_free_result(res);
+					if(count == 1) return false;
+					else return true;					
+				}
+			}
+			mysql_free_result(res);
+	}	
+	return false;
+}
+std::string Chat::check_uname(MYSQL& mysql, MYSQL_RES* res, MYSQL_ROW& row, std::string table, std::string log){
+		std::string str = "SELECT name FROM " + table + " WHERE login = \'" + log + "\'";
+	std::string name;
+	if(mysql_query(&mysql, str.c_str()))
+		std::cout << " Erorr: сбой получения имени " << std::endl << mysql_error(&mysql) << std::endl;
+	else{
+		res = mysql_use_result(&mysql);
+		if(res){
+			if (row = mysql_fetch_row(res)){
+				name = row[0];
+			}
+		}
+		mysql_free_result(res);
+		return name;
+	}	
+    return name;
+}
 
 void Chat::chat_work()
 {
@@ -212,6 +198,7 @@ std::shared_ptr<User> Chat::getUserByLogin(const std::string &login) const
     return nullptr;
 }
 
+
 std::shared_ptr<User> Chat::getUserByName(const std::string &name) const
 {
     for (auto &user : userList_)
@@ -226,30 +213,27 @@ void Chat::login()
 {
     std::string login, name, password;
     User user = User(login, name, password);
-   
+    
     char operation;
-    do
-    {
-        std::cout << line << std::endl;
+   
+    std::cout << line << std::endl;
         std::cout << "login: ";
         std::cin >> login;
+        user.setUserLogin(login);
         std::cout << "password: ";
         std::cin >> password;
+        user.setUserPassword(password);
         std::cout << line << std::endl;
+       if(check_pass(mysql, res, row, table_users, user.getUserLogin(), user.getUserPassword()))
+       {
+        std::cout << green_begin<<"Добро пожаловать в чат "<<green_end<< login<< std::endl;
+        ShowUserMenu();
+       }
+       else{
+        std::cout << red_begin << "Неверный логин или пароль"<<red_end << std::endl;
+       }
+ }
 
-        currentUser_ = user.getUserLogin();
-        char operation;
-        if (currentUser_ == nullptr || (password != currentUser_->getUserPassword())) // Проверка на наличие пользователя и правильности пароля
-        {
-            currentUser_ = nullptr;
-            std::cout << red_begin << "Неверный логин!!!, для повторения нажмите любую клавищу. Для выхода нажмите 0(ноль) " << red_end << std::endl;
-
-            std::cin >> operation;
-            if (operation == '0')
-                break;
-        }
-    } while (!currentUser_);
-}
 
 void Chat::signUp()
 
@@ -322,7 +306,7 @@ void Chat::ShowAllUsersName() const
 void Chat::ShowLoginMenu()
 {
     setlocale(LC_ALL, "");
-    //currentUser_ = nullptr;
+    
     char operation;
     do
     {
@@ -358,15 +342,13 @@ void Chat::ShowLoginMenu()
             std::cout << "1 or 2..." << std::endl;
             break;
         }
-    } while (isChatWork_);        // (!currentUser_ && isChatWork_);
+    } while (isChatWork_);
 }
 
 void Chat::ShowUserMenu()
 {
     char operation;
-    ;
-    std::cout << " Привет, " << currentUser_->getUserName() << std::endl;
-    std::cout << line << std::endl;
+    
     while (currentUser_)
     {
         std::cout << yellow_begin << " Просмотр зарегистрированных пользователей в чате - введите 1 " << yellow_end << std::endl;
@@ -449,95 +431,4 @@ void Chat::showChat() const
     std::cout << line << std::endl;
 }
 
-// bool Chat::check_login_table(MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row, std::string table, std::string log){
-// 	std::string str = "SELECT COUNT(*) FROM " + table + " WHERE login = \'" + log + "\'";
-// 	if(mysql_query(&ms, str.c_str()))
-// 		std::cout << " Erorr: сбой проверки логина " << std::endl
-// 			<< mysql_error(&ms) << std::endl;
-// 	else{
-// 			res = mysql_use_result(&ms);
-// 			if(res){
-// 				if (row = mysql_fetch_row(res)){
-// 					int count = std::stoi(row[0]);
-// 					mysql_free_result(res);
-// 					if(count > 0) return false;
-// 					else return true;
-// 				}
-// 			}
-// 			mysql_free_result(res);
-// 	}
-// 	return -1;
-// }
-// bool Chat::check_pass_table(MYSQL &ms, MYSQL_RES *res, MYSQL_ROW &row, std::string table, std::string log, std::string pass)
-// {
-// std::string str = "SELECT COUNT(*) FROM " + table + " WHERE login = \'" + log + "\' AND hash = \'" + pass + "\'";
-// 	if(mysql_query(&ms, str.c_str()))
-// 		std::cout << " Erorr: сбой проверки пароля " << std::endl
-// 			<< mysql_error(&ms) << std::endl;
-// 	else{
-// 			res = mysql_use_result(&ms);
-// 			if(res){
-// 				if (row = mysql_fetch_row(res)){
-// 					int count = std::stoi(row[0]);
-// 					mysql_free_result(res);
-// 					if(count == 1) return false;
-// 					else return true;
-// 				}
-// 			}
-// 			mysql_free_result(res);
-// 	}
-// 	return false;
-// }
 
-// //--------------- Вход и регистрация ----------------------------------------------------
-// void Chat::registration(char menu, bool* check_user, MYSQL& ms, MYSQL_RES* res, MYSQL_ROW& row) {
-// 	User user;
-
-// 	*check_user = false;
-// 	// Вход в чат
-// 	if (menu == '1') {
-// 		exchange(" Введите логин(латинский алфавит, цифры, символы): ");
-// 		user.get_user_login(message());
-// 		exchange(" Введите пароль(латинский алфавит, цифры, символы): ");
-// 		user.get_user_password(message());
-// 		int counter = 0;
-// 		if (!check_pass_table(ms, res, row, table_users, user.user_login(), user.user_password())) {
-// 			user.get_user_name(name_user(ms, res, row, table_users, user.user_login()));
-// 			get_user(user.user_login(), user.user_name());
-// 			transmitting(user.user_name());
-// 			*check_user = true;
-// 		}
-// 		else {
-// 			transmitting("false");
-// 			return;
-// 		}
-// 	}
-
-// 	// регистрация нового пользователя
-// 	else {
-// 		*check_user = true;
-// 		user.get_user_name(message());
-// 		exchange(user.user_name());
-// 		exchange(" Введите логин (латинский алфавит, цифры, символы): ");
-// 		bool check_login;
-// 		do {
-// 			user.get_user_login(message());
-// 			check_login = check_login_table(ms, res, row, table_users, user.user_login());
-// 			if (check_login == false) {
-// 				user.clear_login();
-// 				exchange("false");
-// 			}
-// 		} while (!check_login);
-// 		exchange(" логин принят");
-// 		exchange( " Введите пароль (латинский алфавит, цифры, символы): ");
-// 		user.get_user_password(message());
-// 		std::cout << message() << std::endl;
-// 		insert_into_users(ms, table_users, user.user_login(), user.user_name(), user.user_password());
-// 		if(check_login_table(ms, res, row, table_users, user.user_login())){
-// 			*check_user = false;
-// 			return;
-// 		}
-// 		show_table(ms, res, row, table_users);
-// 		exchange("reg ok");
-// 	}
-// }
